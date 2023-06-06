@@ -32,9 +32,11 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: dist-folder-files
-          path: |
-            dist
-            package.json
+          path: dist
+          #name: dist-folder-files
+          #path: |
+          #  dist
+          #  package.json
           #use the pipe for multi-line paths  
   deploy:
     needs: build
