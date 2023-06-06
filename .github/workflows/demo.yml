@@ -26,10 +26,12 @@ jobs:
         run: npm ci
       - name: Build website
         run: npm run build
-        # this produces artifacts in /dist folder
+        # this produces artifacts in /dist folder as we saw when running locally
+        # the same will happen when the runner runs this 
         # actions/upload-artifact allows us to upload artifacts
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
+        # this will upload the artifacts from the runner
         with:
           name: dist-folder-files
           path: dist
@@ -39,8 +41,18 @@ jobs:
           #  package.json
           #use the pipe for multi-line paths  
   deploy:
+  #every job gets a different runner machine so files are not all co-located between jobs
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Get build artifacts from build job
+        uses: actions/downoad-artifact@v3
+        # this downloads the artifacts that were uploaded; the download is to the deploy runner
+        with:
+          name: dist-folder-files
+          # grabs the files that were uploaded and downloads them and unzips them
+      - name: Output the contents that are on the deploy runner
+        run: ls
+        #standard linux ls command to show contents of the downloaded folder    
       - name: Deploy
         run: echo "Deploying..."
