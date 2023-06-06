@@ -10,6 +10,24 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          # this is the path for node js for it's internal cache
+          # npm builds a cache but since different jobs uses diffeent machines we cannot use this internal cache
+          # we tell the npm internal cache to store this on central github server so that it can be used across jobs and workflows
+          #key is to fetch the cache Key also will tell if need to re-create the cache if expired 
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+          # the key has a hash based upon the contents of the file. The path is **/package-lock.json files
+          # package-lock.json is a listing of all the current dependencies.
+          # if anything changes in this file the hash will be different and thus the key will be different and there will have to be a new fetch 
+          # to update the cache with the new dependencies listing. There would have to be a reinstall of dependencies
+          # npm ci uses this cache. If the cache exists and is to date it will be used.
+          # if the cache needs to be re-generated "npm ci" will reinstall all the dependencies.
+          # cache steps also executes after job finished so if new dependencies installed it will be updated at end of job
+          # extensive listing of use-cases are at https://github.com/actions/cache
+          # NOTE: this step must be repeated in all the jobs installing dependencies. Build job will need this too.
       - name: Install dependencies
         run: npm ci
       - name: Lint code
@@ -27,6 +45,25 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          # this is the path for node js for it's internal cache
+          # npm builds a cache but since different jobs uses diffeent machines we cannot use this internal cache
+          # we tell the npm internal cache to store this on central github server so that it can be used across jobs and workflows
+          #key is to fetch the cache Key also will tell if need to re-create the cache if expired 
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+          # the key has a hash based upon the contents of the file. The path is **/package-lock.json files
+          # package-lock.json is a listing of all the current dependencies.
+          # if anything changes in this file the hash will be different and thus the key will be different and there will have to be a new fetch 
+          # to update the cache with the new dependencies listing. There would have to be a reinstall of dependencies
+          # npm ci uses this cache. If the cache exists and is to date it will be used.
+          # if the cache needs to be re-generated "npm ci" will reinstall all the dependencies.
+          # cache steps also executes after job finished so if new dependencies installed it will be updated at end of job
+          # extensive listing of use-cases are at https://github.com/actions/cache
+          # NOTE: this step must be repeated in all the jobs installing dependencies. Build job will need this too.
+          # NOTE: build job will have access to this cache that was initally created in the test job above.  
       - name: Install dependencies
         run: npm ci
       - name: Build website
