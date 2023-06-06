@@ -19,6 +19,11 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      output-name: ${{ steps.step-id.outputs.output-name }}
+      # this is the output of the overall job.
+      # the steps is a special context value for github actions
+      # it can index the id below by name (step-id, see below)
     steps:
       - name: Get code
         uses: actions/checkout@v3
@@ -29,6 +34,12 @@ jobs:
         # this produces artifacts in /dist folder as we saw when running locally
         # the same will happen when the runner runs this 
         # actions/upload-artifact allows us to upload artifacts
+      - name: Publish JS filename index.d590f20c.js
+        id: step-id
+        #id is used above for outputs: output-name above
+        run: find dist/assets/*.js -type f -execdir echo 'output-name={}' >> $GITHUB_OUTPUT ';'
+        # must generate the name and the output key value pair written to GITHUB_OUTPUT variable
+        # 'output-name' is the name used above for the outputs
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         # this will upload the artifacts from the runner
@@ -53,6 +64,12 @@ jobs:
           # grabs the files that were uploaded and downloads them and unzips them
       - name: Output the contents that are on the deploy runner
         run: ls
-        #standard linux ls command to show contents of the downloaded folder    
+        #standard linux ls command to show contents of the downloaded folder   
+      - name: Output filename
+        run: echo "${{ needs.build.outputs.output-name }}" 
+        # this command uses the output of the build job data
+        # the needs object is required (or the jobs object can be used as well)
+        # build is a dependency on this job  
+        # this needs object has all the outputs of the build dependency job for this job
       - name: Deploy
         run: echo "Deploying..."
