@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get build artifacts from build job
-        uses: actions/downoad-artifact@v3
+        uses: actions/download-artifact@v3
         # this downloads the artifacts that were uploaded; the download is to the deploy runner
         with:
           name: dist-folder-files
